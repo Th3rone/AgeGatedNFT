@@ -1,134 +1,146 @@
-❤️ AgeGatedNFT — Private Match (FHEVM dApp)
+# 🎟️ AgeGatedNFT — Encrypted Age Verification for NFT Access (FHEVM)
 
-A decentralized fully homomorphic encrypted matchmaking dApp on Ethereum (Sepolia testnet) using Zama’s FHEVM protocol.
-Profiles and preferences are encrypted → matched on-chain → only the final match result is decryptable.
-No data leaks. No exposure of personal information.
+**AgeGatedNFT** introduces a new approach to gated digital collectibles using **Fully Homomorphic Encryption (FHE)**.
+Instead of revealing a user’s birth year or age, the contract performs an encrypted comparison to determine whether the user meets a required minimum age — without ever exposing sensitive information on-chain.
 
-⚡ Features
+Powered by **Zama’s FHEVM**, this system enables **private age verification**, secure NFT minting, and optional public reveal of verification status.
 
-Publish encrypted user profiles (age, gender, interests, region)
+---
 
-Submit encrypted match preferences
+## 🔍 What This Project Demonstrates
 
-Homomorphic computation of match compatibility directly on-chain
+* 🔐 **Confidential Age Proofing**: Users submit encrypted birth year values.
+* 🧮 **Encrypted On-Chain Computation**: Age is calculated using FHE subtraction and compared to the minimum allowed age homomorphically.
+* 🎯 **NFT Minting Based on Private Conditions**: Only users who satisfy the encrypted age check may mint.
+* 🕵️ **Zero Exposure of Personal Data**: No plaintext age or birth year is ever revealed unless the user chooses to.
+* 🌐 **Seamless User Flow**: The contract returns encrypted handles compatible with the Relayer SDK for client-side decryption.
 
+This contract is ideal for **age-restricted content**, **event passes**, **membership NFTs**, and any scenario where verifying identity attributes must remain private.
 
-Zero knowledge of inputs — full privacy preserved
+---
 
-Modern dual-column glassmorphic UI built with pure HTML + CSS
+## 🧱 Core Components
 
-Powered by Zama Relayer SDK v0.3.0 and Ethers.js v6
+### 🔹 Encrypted Verification Storage
 
-🛠 Quick Start
-Prerequisites
+Each user receives a private `ebool` representing whether they meet the age requirement.
 
-Node.js ≥ 20
+### 🔹 Homomorphic Age Calculation
 
-npm / yarn / pnpm
+Steps performed entirely under encryption:
 
-MetaMask or any injected Ethereum-compatible wallet
+```
+1. Retrieve encrypted birth year.
+2. Convert current year → encrypted constant.
+3. Compute encryptedAge = currentYear - birthYear.
+4. Compare encryptedAge >= minAgeEncrypted.
+```
 
-Installation
-Clone the repository
-git clone <your-repo-url>
-cd EncryptedCertificationFilter
+### 🔹 NFT Minting Logic
 
-Install dependencies
+Minting is only permitted if the **publicly decrypted result** returns `true`.
+This avoids plaintext exposure inside the smart contract while keeping the logic verifiable for users.
+
+---
+
+## 📦 Repository Structure
+
+```
+AgeGatedNFT/
+├── contracts/
+│   └── AgeGatedNFT.sol
+├── deploy/
+├── frontend/
+│   └── index.html (optional UI integration)
+├── hardhat.config.js
+└── package.json
+```
+
+---
+
+## 🚀 Setup
+
+### Install Packages
+
+```bash
+git clone https://github.com/Th3rone/AgeGatedNFT
+cd AgeGatedNFT
 npm install
+```
 
-Set up environment variables
+### Configure Environment
+
+```bash
 npx hardhat vars set MNEMONIC
 npx hardhat vars set INFURA_API_KEY
-npx hardhat vars set ETHERSCAN_API_KEY   # optional
+npx hardhat vars set ETHERSCAN_API_KEY
+```
 
-Compile Contracts
+### Compile / Test
+
+```bash
 npm run compile
-
-Run Tests
 npm run test
+```
 
-Deploy to Local Network
+---
+
+## 🌐 Deployment
+
+### Local Development Chain
+
+```bash
 npx hardhat node
 npx hardhat deploy --network localhost
+```
 
-Deploy to Sepolia FHEVM Testnet
+### Deploy to Sepolia FHEVM
+
+```bash
 npx hardhat deploy --network sepolia
-npx hardhat verify --network sepolia 
+npx hardhat verify --network sepolia
+```
 
-CONTRACT_ADDRESS: "0xC59708C6296F5EC797189aA11Bf6e82285870C0F"
+Add your deployed contract address here after deployment.
 
+---
 
-📁 Project Structure
-tinderdao-private-match/
-├── contracts/
-│   └── AgeGatedNFT.sol                      # Main FHE-enabled matchmaking contract
-├── deploy/                                  # Deployment scripts
-├── frontend/                                # Web UI (FHE Relayer integration)
-│   └── index.html
-├── hardhat.config.js                        # Hardhat + FHEVM config
-└── package.json                             # Dependencies and npm scripts
+# 🖥 Frontend Workflow (Relayer SDK)
 
-📜 Available Scripts
-Command	Description
-npm run compile	Compile all smart contracts
-npm run test	Run unit tests
-npm run clean	Clean build artifacts
-npm run start	Launch frontend locally
-npx hardhat deploy --network sepolia	Deploy to FHEVM Sepolia testnet
-npx hardhat verify	Verify contract on Etherscan
-🔗 Frontend Integration
+The encrypted birth year is submitted via:
 
-The frontend (pure HTML + vanilla JS) uses:
-
-@zama-fhe/relayer-sdk v0.3.0
-
-ethers.js v6.13
-
-Web3 wallet (MetaMask) connection
+* `createEncryptedInput(...)`
+* `userDecrypt(...)` for private decryption
+* `publicDecrypt(...)` if the user chooses to reveal their result
 
 Workflow:
 
-Connect wallet
+1. User encrypts their birth year in the browser.
+2. Contract computes age eligibility homomorphically.
+3. User decrypts the result locally.
+4. If desired, user can publish the verification.
+5. Eligible users mint their NFT.
 
-Encrypt & Submit a preference query (desired criteria)
+No sensitive information ever touches the chain.
 
-Compute match handle via computeMatchHandle()
+---
 
-Make public the result using makeMatchPublic()
+## 📚 Reference Links
 
-Publicly decrypt → get final result (MATCH ✅ / NO MATCH ❌)
+* FHEVM Overview — [https://docs.zama.ai/protocol](https://docs.zama.ai/protocol)
+* Relayer SDK Docs — [https://docs.zama.ai/protocol/relayer-sdk-guides/](https://docs.zama.ai/protocol/relayer-sdk-guides/)
+* Solidity FHE Library — [https://github.com/zama-ai/fhevm-solidity](https://github.com/zama-ai/fhevm-solidity)
+* OpenZeppelin ERC721 — [https://docs.openzeppelin.com/contracts/](https://docs.openzeppelin.com/contracts/)
 
-🧩 FHEVM Highlights
+---
 
-Encrypted types: euint8, euint16
+## 🆘 Support
 
-Homomorphic operations: FHE.eq, FHE.and, FHE.or, FHE.gt, FHE.lt
+* Create an issue on GitHub
+* Zama Discord — [https://discord.gg/zama-ai](https://discord.gg/zama-ai)
 
-Secure access control using FHE.allow & FHE.allowThis
+---
 
-Public decryption enabled with FHE.makePubliclyDecryptable
+## 📄 License
 
-Frontend encryption/decryption handled via Relayer SDK proofs
-
-📚 Documentation
-
-Zama FHEVM Overview
-
-Relayer SDK Guide
-
-Solidity Library: FHE.sol
-
-Ethers.js v6 Documentation
-
-🆘 Support
-
-🐛 GitHub Issues: Report bugs or feature requests
-
-💬 Zama Discord: discord.gg/zama-ai
- — community help
-
-📄 License
-
-BSD-3-Clause-Clear License
-See the LICENSE
- file for full details.
+**MIT License**
